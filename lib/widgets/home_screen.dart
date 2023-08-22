@@ -1,8 +1,5 @@
-import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -30,7 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5002/generate-meta'),
+        //Uri.parse('http://localhost:5002/generate-meta'),
+        Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'keyword': keywordController.text,
