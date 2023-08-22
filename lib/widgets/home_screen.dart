@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -25,27 +28,60 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = true;
     });
 
-    final response = await http.post(
-      Uri.parse('http://localhost:5002/generate-meta'),
-      //Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'keyword': keywordController.text,
-        'url': urlController.text,
-        'language': languageController.text,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:5002/generate-meta'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'keyword': keywordController.text,
+          'url': urlController.text,
+          'language': languageController.text,
+        }),
+      );
 
-    final data = json.decode(response.body);
+      final data = json.decode(response.body);
 
-    setState(() {
-      title = data['title'];
-      description = data['description'];
-      isLoading = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppStrings.metaGenerationComplete)));
+      if (data.containsKey('error')) {
+        if (data.containsKey('message'))
+          showErrorDialog(data['error'] + "\n\n **** \n\n"
+              "Technical Details:\n\n"
+              + data['message']);
+        else
+          showErrorDialog(data['error']);
+      } else {
+        setState(() {
+          title = data['title'];
+          description = data['description'];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      showErrorDialog("Failed to connect to the server.");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
