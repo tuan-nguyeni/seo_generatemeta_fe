@@ -1,4 +1,3 @@
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -6,14 +5,13 @@ import 'dart:convert';
 
 import '../constants.dart';
 
-// Remember to create a constants.dart and import it here.
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _formKey = GlobalKey<FormState>();
   final keywordController = TextEditingController();
   final urlController = TextEditingController();
   final languageController = TextEditingController();
@@ -24,16 +22,18 @@ class _HomeScreenState extends State<HomeScreen> {
   String description = "";
   bool isLoading = false;
 
+  // Adding focus nodes
+  final FocusNode urlFocusNode = FocusNode();
+  final FocusNode languageFocusNode = FocusNode();
+  final FocusNode excludedWordsFocusNode = FocusNode();
+
   void generateMeta() async {
     setState(() {
       isLoading = true;
     });
-    // Logging event when user initiates meta generation
     analytics.logEvent(name: 'generate_meta_attempt', parameters: null);
-
     try {
       final response = await http.post(
-        //Uri.parse('http://localhost:5002/generate-meta'),
         Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
@@ -42,20 +42,19 @@ class _HomeScreenState extends State<HomeScreen> {
           'language': languageController.text,
           'excluded_words': excludedWordsController.text,
         }),
-
       );
 
       final data = json.decode(response.body);
 
       if (data.containsKey('error')) {
-        if (data.containsKey('message'))
+        if (data.containsKey('message')) {
           showErrorDialog(data['error'] + "\n\n **** \n\n"
               "Technical Details:\n\n"
               + data['message']);
-        else
+        } else {
           showErrorDialog(data['error']);
+        }
       } else {
-        // After successful meta generation
         analytics.logEvent(name: 'meta_generation_success', parameters: {
           'keyword': keywordController.text,
           'url': urlController.text,
@@ -101,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               analytics.logEvent(name: 'imprint_attempt', parameters: null);
               Navigator.pushNamed(context, '/imprint');
-              },
+            },
           ),
         ],
       ),
@@ -127,33 +125,42 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
-            Card(
-              elevation: 5.0,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: keywordController,
-                      decoration: InputDecoration(labelText: 'Keyword', border: OutlineInputBorder()),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: urlController,
-                      decoration: InputDecoration(labelText: 'URL', border: OutlineInputBorder()),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: languageController,
-                      decoration: InputDecoration(labelText: 'Language', border: OutlineInputBorder()),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: excludedWordsController,
-                      decoration: InputDecoration(labelText: 'Exclude these words in the generated result', border: OutlineInputBorder()),
-                    ),
-
-                  ],
+            Form(
+              key: _formKey,
+              child: Card(
+                elevation: 5.0,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: keywordController,
+                        onSubmitted: (value) => FocusScope.of(context).requestFocus(urlFocusNode),
+                        decoration: InputDecoration(labelText: 'Keyword', border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: urlController,
+                        focusNode: urlFocusNode,
+                        onSubmitted: (value) => FocusScope.of(context).requestFocus(languageFocusNode),
+                        decoration: InputDecoration(labelText: 'URL', border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: languageController,
+                        focusNode: languageFocusNode,
+                        onSubmitted: (value) => FocusScope.of(context).requestFocus(excludedWordsFocusNode),
+                        decoration: InputDecoration(labelText: 'Language', border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: excludedWordsController,
+                        focusNode: excludedWordsFocusNode,
+                        onSubmitted: (value) => generateMeta(),
+                        decoration: InputDecoration(labelText: 'Exclude these words in the generated result', border: OutlineInputBorder()),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -164,7 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: generateMeta,
               child: Text('Generate'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
               ),
             ),
             SizedBox(height: 20),
