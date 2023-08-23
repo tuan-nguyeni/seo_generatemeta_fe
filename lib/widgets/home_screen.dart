@@ -1,4 +1,5 @@
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final keywordController = TextEditingController();
   final urlController = TextEditingController();
   final languageController = TextEditingController();
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   String title = "";
   String description = "";
   bool isLoading = false;
@@ -24,11 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isLoading = true;
     });
+    // Logging event when user initiates meta generation
+    analytics.logEvent(name: 'generate_meta_attempt', parameters: null);
 
     try {
       final response = await http.post(
-        //Uri.parse('http://localhost:5002/generate-meta'),
-        Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
+        Uri.parse('http://localhost:5002/generate-meta'),
+        //Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'keyword': keywordController.text,
@@ -47,6 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
         else
           showErrorDialog(data['error']);
       } else {
+        // After successful meta generation
+        analytics.logEvent(name: 'meta_generation_success', parameters: {
+          'keyword': keywordController.text,
+          'url': urlController.text,
+          'language': languageController.text,
+        });
         setState(() {
           title = data['title'];
           description = data['description'];
@@ -63,6 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void showErrorDialog(String message) {
+    analytics.logEvent(name: 'meta_generation_failed', parameters: {
+      'keyword': keywordController.text,
+      'url': urlController.text,
+      'language': languageController.text,
+      'error message': message
+    });
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -89,7 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline),
-            onPressed: () => Navigator.pushNamed(context, '/imprint'),
+            onPressed: () {
+              analytics.logEvent(name: 'imprint_attempt', parameters: null);
+              Navigator.pushNamed(context, '/imprint');
+              },
           ),
         ],
       ),
@@ -134,8 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: generateMeta,
               child: Text('Generate'),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                onPrimary: Colors.white,
+                foregroundColor: Colors.white, backgroundColor: Colors.blue,
               ),
             ),
             SizedBox(height: 20),
