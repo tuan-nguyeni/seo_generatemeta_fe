@@ -17,6 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final keywordController = TextEditingController();
   final urlController = TextEditingController();
   final languageController = TextEditingController();
+  final excludedWordsController = TextEditingController();
+
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   String title = "";
   String description = "";
@@ -38,7 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
           'keyword': keywordController.text,
           'url': urlController.text,
           'language': languageController.text,
+          'excluded_words': excludedWordsController.text,
         }),
+
       );
 
       final data = json.decode(response.body);
@@ -143,6 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: languageController,
                       decoration: InputDecoration(labelText: 'Language', border: OutlineInputBorder()),
                     ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: excludedWordsController,
+                      decoration: InputDecoration(labelText: 'Exclude these words in the generated result', border: OutlineInputBorder()),
+                    ),
+
                   ],
                 ),
               ),
