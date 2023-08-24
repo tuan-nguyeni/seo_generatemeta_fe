@@ -117,79 +117,81 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SelectableText(
-              AppStrings.descriptionInfo,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Form(
-              key: _formKey,
-              child: Card(
-                elevation: 5.0,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: keywordController,
-                        onSubmitted: (value) => FocusScope.of(context).requestFocus(urlFocusNode),
-                        decoration: InputDecoration(labelText: 'Keyword', border: OutlineInputBorder()),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: urlController,
-                        focusNode: urlFocusNode,
-                        onSubmitted: (value) => FocusScope.of(context).requestFocus(languageFocusNode),
-                        decoration: InputDecoration(labelText: 'URL', border: OutlineInputBorder()),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: languageController,
-                        focusNode: languageFocusNode,
-                        onSubmitted: (value) => FocusScope.of(context).requestFocus(excludedWordsFocusNode),
-                        decoration: InputDecoration(labelText: 'Language', border: OutlineInputBorder()),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: excludedWordsController,
-                        focusNode: excludedWordsFocusNode,
-                        onSubmitted: (value) => generateMeta(),
-                        decoration: InputDecoration(labelText: 'Exclude these words in the generated result', border: OutlineInputBorder()),
-                      ),
-                    ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SelectableText(
+                AppStrings.descriptionInfo,
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 20),
+              Form(
+                key: _formKey,
+                child: Card(
+                  elevation: 5.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: keywordController,
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(urlFocusNode),
+                          decoration: InputDecoration(labelText: 'Keyword', border: OutlineInputBorder()),
+                        ),
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: urlController,
+                          focusNode: urlFocusNode,
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(languageFocusNode),
+                          decoration: InputDecoration(labelText: 'URL', border: OutlineInputBorder()),
+                        ),
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: languageController,
+                          focusNode: languageFocusNode,
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(excludedWordsFocusNode),
+                          decoration: InputDecoration(labelText: 'Language', border: OutlineInputBorder()),
+                        ),
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: excludedWordsController,
+                          focusNode: excludedWordsFocusNode,
+                          onSubmitted: (value) => generateMeta(),
+                          decoration: InputDecoration(labelText: 'Exclude these words in the generated result', border: OutlineInputBorder()),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 10),
-            isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: generateMeta,
-              child: Text('Generate'),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue,
+              SizedBox(height: 10),
+              isLoading
+                  ? CircularProgressIndicator()
+                  : ElevatedButton(
+                onPressed: generateMeta,
+                child: Text('Generate'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              AppStrings.generatedTitle,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 5),
-            SelectableText(title),
-            SizedBox(height: 10),
-            Text(
-              AppStrings.generatedDescription,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 5),
-            SelectableText(description),
-          ],
+              SizedBox(height: 20),
+              Text(
+                AppStrings.generatedTitle,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 5),
+              SelectableText(title),
+              SizedBox(height: 10),
+              Text(
+                AppStrings.generatedDescription,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 5),
+              SelectableText(description),
+            ],
+          ),
         ),
       ),
     );
