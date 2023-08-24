@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../constants.dart';
+import '../utils/env_helper.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -33,8 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     analytics.logEvent(name: 'generate_meta_attempt', parameters: null);
     try {
+      print("this is the url " + EnvHelper.baseUrl);
       final response = await http.post(
-        Uri.parse('https://seo-generatemeta-be-bc08e0e40826.herokuapp.com/generate-meta'),
+        Uri.parse(EnvHelper.baseUrl),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'keyword': keywordController.text,
